@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Todo;
 use App\Services\TodolistService;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -19,9 +21,11 @@ class TodolistController extends Controller
     public function todoList(Request $request)
     {
         $todolist = $this->todolistService->getTodolist();
+        $tanggal = Carbon::parse($todolist[0]['created_at'])->format('d F Y');
         return response()->view("todolist.todolist", [
             "title" => "Todolist",
-            "todolist" => $todolist
+            "todolist" => $todolist,
+            "tanggal" => $tanggal
         ]);
     }
 
@@ -43,10 +47,35 @@ class TodolistController extends Controller
         return redirect()->action([TodolistController::class, 'todoList']);
     }
 
+    public function editTodo($id)
+    {
+        $todo = $this->todolistService->getTodoById($id);
+        return response()->view('todolist.edit', [
+            'todo' => $todo
+        ]);
+    }
+
+    public function updateTodo(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'required',
+            'todo' => 'required'
+        ]);
+
+        $this->todolistService->updateTodo($request->input('id'), $request->input('todo'));
+
+        $todolist = $this->todolistService->getTodolist();
+        $tanggal = Carbon::parse($todolist[0]['updated_at'])->format('d F Y');
+        return response()->view('todolist.todolist', [
+            'title' => 'Todolist',
+            'todolist' => $this->todolistService->getTodolist(),
+            'tanggal' => $tanggal
+        ]);
+    }
+
     public function removeTodo(Request $request, string $todoId): RedirectResponse
     {
         $this->todolistService->removeTodo($todoId);
         return redirect()->action([TodolistController::class, 'todoList']);
     }
-
 }

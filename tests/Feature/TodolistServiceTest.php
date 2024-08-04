@@ -83,4 +83,23 @@ class TodolistServiceTest extends TestCase
 
         self::assertEquals(0, sizeof($this->todolistService->getTodolist()));
     }
+
+    public function testGetTodoByIdSuccess()
+    {
+        $expected = [
+            [
+                "id" => "1",
+                "todo" => "Iqbal"
+            ],
+            [
+                "id" => "2",
+                "todo" => "Budi"
+            ]
+        ];
+
+        $this->todolistService->saveTodo("1", "Iqbal");
+        $this->todolistService->saveTodo("2", "Budi");
+
+        Assert::assertArraySubset($expected, $this->todolistService->getTodoById('1'));
+    }
 }
